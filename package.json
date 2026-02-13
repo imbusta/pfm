@@ -21,11 +21,20 @@
     "test:frontend": "npm test --workspace=frontend",
     "test": "npm run test:backend && npm run test:frontend"
   },
-  "keywords": ["finance", "ai", "copilot", "pim", "budgeting"],
+  "keywords": [
+    "finance",
+    "ai",
+    "copilot",
+    "pim",
+    "budgeting"
+  ],
   "author": "",
   "license": "MIT",
   "engines": {
     "node": ">=18.0.0",
     "npm": ">=9.0.0"
+  },
+  "dependencies": {
+    "openai": "^6.21.0"
   }
 }

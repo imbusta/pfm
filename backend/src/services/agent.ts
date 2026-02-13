@@ -1,36 +1,36 @@
-import Anthropic from '@anthropic-ai/sdk';
+import OpenAI from 'openai';
 import config from '../config';
 import { AgentRequest, AgentResponse } from '../types';
 import analyticsService from './analytics';
 
 export class AgentService {
-  private client: Anthropic;
+  private client: OpenAI;
 
   constructor() {
-    this.client = new Anthropic({
-      apiKey: config.anthropicApiKey,
+    this.client = new OpenAI({
+      apiKey: config.anthropicApiKey,      // Claude API key
+      baseURL: "https://api.anthropic.com/v1/",
     });
   }
 
   async chat(request: AgentRequest): Promise<AgentResponse> {
+
     try {
       const systemPrompt = this.buildSystemPrompt(request.context);
-
-      const message = await this.client.messages.create({
-        model: 'claude-3-5-sonnet-20241022',
-        max_tokens: 1024,
-        system: systemPrompt,
-        messages: [{
-          role: 'user',
-          content: request.message,
-        }],
+      
+      const message = await this.client.chat.completions.create({
+        model: 'claude-opus-4-6',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: request.message }
+        ],
       });
 
-      const content = message.content[0];
-      if (content.type === 'text') {
+      const content = message.choices[0].message.content;
+      if (content) {
         return {
-          message: content.text,
-          suggestions: this.extractSuggestions(content.text),
+          message: content,
+          suggestions: this.extractSuggestions(content),
         };
       }
 

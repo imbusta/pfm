@@ -1,8 +1,14 @@
+import dotenv from 'dotenv';
+
+// Load environment variables FIRST
+dotenv.config();
+
 interface Config {
   port: number;
   nodeEnv: string;
   corsOrigin: string;
   anthropicApiKey: string;
+  openaiApiKey: string;
   logLevel: string;
   // Database config (to be added later)
   // database: {
@@ -14,11 +20,13 @@ interface Config {
   // };
 }
 
+
 const config: Config = {
   port: parseInt(process.env.PORT || '3000', 10),
   nodeEnv: process.env.NODE_ENV || 'development',
   corsOrigin: process.env.CORS_ORIGIN || 'http://localhost:5173',
   anthropicApiKey: process.env.ANTHROPIC_API_KEY || '',
+  openaiApiKey: process.env.OPENAI_API_KEY || '',
   logLevel: process.env.LOG_LEVEL || 'info',
 };
 
