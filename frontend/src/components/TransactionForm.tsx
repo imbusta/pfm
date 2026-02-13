@@ -1,0 +1,142 @@
+import { useState } from 'react';
+import type { TransactionCreate } from '../types';
+
+interface TransactionFormProps {
+  onSubmit: (data: TransactionCreate) => Promise<void>;
+  onCancel: () => void;
+}
+
+export default function TransactionForm({ onSubmit, onCancel }: TransactionFormProps) {
+  const [formData, setFormData] = useState<TransactionCreate>({
+    date: new Date().toISOString().split('T')[0],
+    description: '',
+    amount: 0,
+    type: 'expense',
+    category: '',
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+
+    if (!formData.description || formData.amount === 0) {
+      setError('Please fill in all required fields');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await onSubmit({
+        ...formData,
+        amount: formData.type === 'expense' ? -Math.abs(formData.amount) : Math.abs(formData.amount),
+      });
+    } catch (err) {
+      setError('Failed to create transaction');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="bg-white rounded-lg shadow p-6">
+      <h2 className="text-xl font-semibold mb-4">New Transaction</h2>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {error && (
+          <div className="bg-red-50 text-red-600 p-3 rounded">{error}</div>
+        )}
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Date
+            </label>
+            <input
+              type="date"
+              value={formData.date as string}
+              onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Type
+            </label>
+            <select
+              value={formData.type}
+              onChange={(e) => setFormData({ ...formData, type: e.target.value as 'income' | 'expense' })}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2"
+            >
+              <option value="expense">Expense</option>
+              <option value="income">Income</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Description
+          </label>
+          <input
+            type="text"
+            value={formData.description}
+            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            className="w-full border border-gray-300 rounded-lg px-3 py-2"
+            placeholder="e.g., Grocery shopping"
+            required
+          />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Amount
+            </label>
+            <input
+              type="number"
+              step="0.01"
+              value={formData.amount}
+              onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value) })}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2"
+              placeholder="0.00"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Category (optional)
+            </label>
+            <input
+              type="text"
+              value={formData.category || ''}
+              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2"
+              placeholder="Auto-classify if empty"
+            />
+          </div>
+        </div>
+
+        <div className="flex gap-3">
+          <button
+            type="submit"
+            disabled={loading}
+            className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:bg-gray-400"
+          >
+            {loading ? 'Creating...' : 'Create Transaction'}
+          </button>
+          <button
+            type="button"
+            onClick={onCancel}
+            className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+          >
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}

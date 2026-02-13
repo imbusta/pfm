@@ -1,0 +1,18 @@
+{
+  "name": "@finance-copilot/shared",
+  "version": "1.0.0",
+  "description": "Shared types for Finance Copilot Agent",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "clean": "rm -rf dist"
+  },
+  "keywords": ["types", "typescript"],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.4.3"
+  }
+}

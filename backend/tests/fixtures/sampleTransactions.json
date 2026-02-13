@@ -1,0 +1,37 @@
+[
+  {
+    "date": "2024-01-01T00:00:00.000Z",
+    "description": "Monthly rent payment",
+    "amount": -1500,
+    "type": "expense",
+    "category": "Housing"
+  },
+  {
+    "date": "2024-01-05T00:00:00.000Z",
+    "description": "Grocery shopping",
+    "amount": -150,
+    "type": "expense",
+    "category": "Food"
+  },
+  {
+    "date": "2024-01-10T00:00:00.000Z",
+    "description": "Gas station",
+    "amount": -60,
+    "type": "expense",
+    "category": "Transportation"
+  },
+  {
+    "date": "2024-01-15T00:00:00.000Z",
+    "description": "Salary deposit",
+    "amount": 5000,
+    "type": "income",
+    "category": "Income"
+  },
+  {
+    "date": "2024-01-20T00:00:00.000Z",
+    "description": "Restaurant dinner",
+    "amount": -80,
+    "type": "expense",
+    "category": "Food"
+  }
+]

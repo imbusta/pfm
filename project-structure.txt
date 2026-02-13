@@ -1,0 +1,53 @@
+.
+├── README.md
+├── backend
+│   ├── README.md
+│   ├── jest.config.js
+│   ├── package.json
+│   ├── src
+│   │   ├── app.ts
+│   │   ├── config
+│   │   ├── index.ts
+│   │   ├── models
+│   │   ├── routes
+│   │   ├── services
+│   │   ├── types
+│   │   └── utils
+│   ├── tests
+│   │   ├── analytics.test.ts
+│   │   ├── fixtures
+│   │   └── transactions.test.ts
+│   └── tsconfig.json
+├── docs
+│   ├── 00-context.md
+│   ├── AGENT.md
+│   └── README.md
+├── frontend
+│   ├── README.md
+│   ├── index.html
+│   ├── package.json
+│   ├── postcss.config.js
+│   ├── public
+│   ├── src
+│   │   ├── App.tsx
+│   │   ├── api
+│   │   ├── components
+│   │   ├── main.tsx
+│   │   ├── pages
+│   │   ├── styles
+│   │   ├── types
+│   │   └── vite-env.d.ts
+│   ├── tailwind.config.js
+│   ├── tsconfig.json
+│   ├── tsconfig.node.json
+│   └── vite.config.ts
+├── package-lock.json
+├── package.json
+├── project-structure.txt
+└── shared
+    ├── package.json
+    ├── tsconfig.json
+    └── types
+        └── index.ts
+
+22 directories, 29 files
