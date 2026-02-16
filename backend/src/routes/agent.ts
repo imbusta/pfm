@@ -60,7 +60,7 @@ router.post('/analyze', async (req: Request, res: Response) => {
 
     // Filter transactions
     if (category) {
-      transactions = transactions.filter(t => t.category === category);
+      transactions = transactions.filter(t => t.category_name === category);
     }
     if (startDate && endDate) {
       const start = new Date(startDate);

@@ -39,14 +39,14 @@ export default function Dashboard() {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="text-gray-500">Loading...</div>
+        <div className="text-text-secondary">Loading...</div>
       </div>
     );
   }
 
   return (
     <div className="px-4 py-6">
-      <h1 className="text-3xl font-bold text-gray-900 mb-6">Dashboard</h1>
+      <h1 className="text-3xl font-bold text-text-primary mb-6">Dashboard</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div>
@@ -58,29 +58,29 @@ export default function Dashboard() {
       </div>
 
       <div className="mt-8">
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
+        <div className="bg-surface rounded-lg shadow-md p-6 border border-gray-200">
+          <h2 className="text-xl font-semibold text-text-primary mb-4">Quick Actions</h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <a
               href="/transactions"
-              className="p-4 border rounded-lg hover:bg-gray-50 text-center"
+              className="p-6 border-2 border-gray-200 rounded-lg hover:border-primary hover:shadow-md transition-all text-center group"
             >
-              <div className="text-2xl mb-2">💰</div>
-              <div className="font-medium">Add Transaction</div>
+              <div className="text-3xl mb-2">💰</div>
+              <div className="font-medium text-text-primary group-hover:text-primary transition-colors">Add Transaction</div>
             </a>
             <a
               href="/budget"
-              className="p-4 border rounded-lg hover:bg-gray-50 text-center"
+              className="p-6 border-2 border-gray-200 rounded-lg hover:border-secondary hover:shadow-md transition-all text-center group"
             >
-              <div className="text-2xl mb-2">📊</div>
-              <div className="font-medium">Create Budget</div>
+              <div className="text-3xl mb-2">📊</div>
+              <div className="font-medium text-text-primary group-hover:text-secondary transition-colors">Create Budget</div>
             </a>
             <a
               href="/chat"
-              className="p-4 border rounded-lg hover:bg-gray-50 text-center"
+              className="p-6 border-2 border-gray-200 rounded-lg hover:border-primary hover:shadow-md transition-all text-center group"
             >
-              <div className="text-2xl mb-2">💬</div>
-              <div className="font-medium">Ask Copilot</div>
+              <div className="text-3xl mb-2">💬</div>
+              <div className="font-medium text-text-primary group-hover:text-primary transition-colors">Ask Copilot</div>
             </a>
           </div>
         </div>

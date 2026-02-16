@@ -24,7 +24,7 @@ export class AnalyticsService {
     const categoryMap = new Map<string, { amount: number; count: number }>();
 
     expenses.forEach(t => {
-      const category = t.category || 'Uncategorized';
+      const category = t.category_name || 'Uncategorized';
       const existing = categoryMap.get(category) || { amount: 0, count: 0 };
       categoryMap.set(category, {
         amount: existing.amount + Math.abs(t.amount),
@@ -71,7 +71,7 @@ export class AnalyticsService {
   calculateAverageSpending(transactions: Transaction[], category?: string): number {
     let filtered = transactions.filter(t => t.type === 'expense');
     if (category) {
-      filtered = filtered.filter(t => t.category === category);
+      filtered = filtered.filter(t => t.category_name === category);
     }
 
     if (filtered.length === 0) return 0;
@@ -81,7 +81,7 @@ export class AnalyticsService {
   detectAnomalies(transactions: Transaction[], category?: string): Transaction[] {
     let filtered = transactions.filter(t => t.type === 'expense');
     if (category) {
-      filtered = filtered.filter(t => t.category === category);
+      filtered = filtered.filter(t => t.category_name === category);
     }
 
     if (filtered.length < 3) return [];

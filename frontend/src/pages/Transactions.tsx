@@ -48,12 +48,12 @@ export default function Transactions() {
   return (
     <div className="px-4 py-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Transactions</h1>
+        <h1 className="text-3xl font-bold text-text-primary">Transactions</h1>
         <button
           onClick={() => setShowForm(!showForm)}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+          className="bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary-dark transition-all shadow-sm hover:shadow-md font-medium"
         >
-          {showForm ? 'Cancel' : 'Add Transaction'}
+          {showForm ? '✕ Cancel' : '+ Add Transaction'}
         </button>
       </div>
 
@@ -65,7 +65,7 @@ export default function Transactions() {
 
       {loading ? (
         <div className="flex justify-center items-center h-64">
-          <div className="text-gray-500">Loading...</div>
+          <div className="text-text-secondary">Loading...</div>
         </div>
       ) : (
         <TransactionList transactions={transactions} onDelete={handleDelete} />

@@ -44,15 +44,30 @@ export default function ChatInterface() {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow flex flex-col" style={{ height: '600px' }}>
+    <div className="bg-surface rounded-lg shadow-md flex flex-col border border-gray-200" style={{ height: '600px' }}>
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.length === 0 ? (
-          <div className="text-center text-gray-500 mt-8">
-            <p className="text-lg mb-2">Ask me anything about your finances!</p>
+          <div className="text-center text-text-secondary mt-8 p-6">
+            <div className="text-6xl mb-4">💬</div>
+            <p className="text-lg mb-2 text-text-primary font-semibold">Ask me anything about your finances!</p>
             <p className="text-sm">
               Try: "What's my biggest spending category?" or "Help me create a budget"
             </p>
+            <div className="mt-6 grid grid-cols-1 gap-2 text-sm">
+              <button
+                onClick={() => setInput("What's my biggest spending category?")}
+                className="p-3 bg-primary/5 hover:bg-primary/10 text-primary rounded-lg transition-colors text-left"
+              >
+                💰 What's my biggest spending category?
+              </button>
+              <button
+                onClick={() => setInput("Help me create a budget")}
+                className="p-3 bg-secondary/5 hover:bg-secondary/10 text-secondary rounded-lg transition-colors text-left"
+              >
+                📊 Help me create a budget
+              </button>
+            </div>
           </div>
         ) : (
           messages.map((msg, index) => (
@@ -61,10 +76,10 @@ export default function ChatInterface() {
               className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
             >
               <div
-                className={`max-w-[80%] rounded-lg px-4 py-2 ${
+                className={`max-w-[80%] rounded-lg px-4 py-3 shadow-sm ${
                   msg.role === 'user'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-900'
+                    ? 'bg-primary text-white'
+                    : 'bg-background text-text-primary border border-gray-200'
                 }`}
               >
                 <p className="whitespace-pre-wrap">{msg.content}</p>
@@ -77,15 +92,15 @@ export default function ChatInterface() {
         )}
         {loading && (
           <div className="flex justify-start">
-            <div className="bg-gray-100 rounded-lg px-4 py-2">
-              <p className="text-gray-500">Thinking...</p>
+            <div className="bg-background border border-primary/30 rounded-lg px-4 py-2">
+              <p className="text-primary animate-pulse">Thinking...</p>
             </div>
           </div>
         )}
       </div>
 
       {/* Input */}
-      <div className="border-t p-4">
+      <div className="border-t-2 border-gray-200 p-4 bg-background">
         <div className="flex gap-2">
           <input
             type="text"
@@ -93,13 +108,13 @@ export default function ChatInterface() {
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleSend()}
             placeholder="Ask me about your finances..."
-            className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600"
+            className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all"
             disabled={loading}
           />
           <button
             onClick={handleSend}
             disabled={loading || !input.trim()}
-            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 disabled:bg-gray-400"
+            className="bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary-dark disabled:bg-text-secondary/50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md font-medium"
           >
             Send
           </button>

@@ -10,14 +10,13 @@ interface Config {
   anthropicApiKey: string;
   openaiApiKey: string;
   logLevel: string;
-  // Database config (to be added later)
-  // database: {
-  //   host: string;
-  //   port: number;
-  //   name: string;
-  //   user: string;
-  //   password: string;
-  // };
+  database: {
+    host: string;
+    port: number;
+    name: string;
+    user: string;
+    password: string;
+  };
 }
 
 
@@ -28,6 +27,13 @@ const config: Config = {
   anthropicApiKey: process.env.ANTHROPIC_API_KEY || '',
   openaiApiKey: process.env.OPENAI_API_KEY || '',
   logLevel: process.env.LOG_LEVEL || 'info',
+  database: {
+    host: process.env.DB_HOST || 'localhost',
+    port: parseInt(process.env.DB_PORT || '5432', 10),
+    name: process.env.DB_NAME || 'pfm',
+    user: process.env.DB_USER || '',
+    password: process.env.DB_PASSWORD || '',
+  },
 };
 
 // Validate required configuration

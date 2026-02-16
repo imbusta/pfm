@@ -31,14 +31,14 @@ export default function Budget() {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="text-gray-500">Loading...</div>
+        <div className="text-text-secondary">Loading...</div>
       </div>
     );
   }
 
   return (
     <div className="px-4 py-6">
-      <h1 className="text-3xl font-bold text-gray-900 mb-6">Budget & Goals</h1>
+      <h1 className="text-3xl font-bold text-text-primary mb-6">Budget & Goals</h1>
       <BudgetView budgets={budgets} goals={goals} />
     </div>
   );

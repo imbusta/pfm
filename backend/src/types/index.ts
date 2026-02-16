@@ -8,30 +8,39 @@ export interface ApiResponse<T = any> {
 
 // Transaction types
 export interface Transaction {
-  id: string;
-  date: Date;
+  id: number;
   description: string;
   amount: number;
-  category?: string;
-  subcategory?: string;
+  currency_id: number;
+  category_id: number | null;
+  subcategory_id: number | null;
   type: 'income' | 'expense';
-  source?: string;
-  notes?: string;
-  tags?: string[];
-  createdAt: Date;
-  updatedAt: Date;
+  is_variable: boolean;
+  date: Date;
+  created_at: Date;
+  updated_at: Date;
+  deleted_at: Date | null;
+
+  // Populated by JOINs for API responses
+  category_name?: string;
+  subcategory_name?: string;
+  currency_code?: string;
 }
 
 export interface TransactionCreate {
-  date: Date;
   description: string;
   amount: number;
+  currency_id?: number;
+  category_id?: number | null;
+  subcategory_id?: number | null;
+  type: 'income' | 'expense';
+  is_variable?: boolean;
+  date: Date;
+
+  // Alternative: allow string-based creation
   category?: string;
   subcategory?: string;
-  type: 'income' | 'expense';
-  source?: string;
-  notes?: string;
-  tags?: string[];
+  currency?: string;
 }
 
 // Budget types

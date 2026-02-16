@@ -40,51 +40,51 @@ export default function TransactionForm({ onSubmit, onCancel }: TransactionFormP
   };
 
   return (
-    <div className="bg-white rounded-lg shadow p-6">
-      <h2 className="text-xl font-semibold mb-4">New Transaction</h2>
+    <div className="bg-surface rounded-lg shadow-md p-6 border border-gray-200">
+      <h2 className="text-xl font-semibold text-text-primary mb-4">New Transaction</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         {error && (
-          <div className="bg-red-50 text-red-600 p-3 rounded">{error}</div>
+          <div className="bg-danger/10 border border-danger text-danger p-3 rounded-lg">{error}</div>
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-text-primary mb-1">
               Date
             </label>
             <input
               type="date"
               value={formData.date as string}
               onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-text-primary mb-1">
               Type
             </label>
             <select
               value={formData.type}
               onChange={(e) => setFormData({ ...formData, type: e.target.value as 'income' | 'expense' })}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
             >
-              <option value="expense">Expense</option>
-              <option value="income">Income</option>
+              <option value="expense">💸 Expense</option>
+              <option value="income">💰 Income</option>
             </select>
           </div>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-text-primary mb-1">
             Description
           </label>
           <input
             type="text"
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2"
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
             placeholder="e.g., Grocery shopping"
             required
           />
@@ -92,7 +92,7 @@ export default function TransactionForm({ onSubmit, onCancel }: TransactionFormP
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-text-primary mb-1">
               Amount
             </label>
             <input
@@ -100,38 +100,38 @@ export default function TransactionForm({ onSubmit, onCancel }: TransactionFormP
               step="0.01"
               value={formData.amount}
               onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value) })}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
               placeholder="0.00"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Category (optional)
+            <label className="block text-sm font-medium text-text-primary mb-1">
+              Category <span className="text-text-secondary text-xs">(optional)</span>
             </label>
             <input
               type="text"
               value={formData.category || ''}
               onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
               placeholder="Auto-classify if empty"
             />
           </div>
         </div>
 
-        <div className="flex gap-3">
+        <div className="flex gap-3 pt-2">
           <button
             type="submit"
             disabled={loading}
-            className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:bg-gray-400"
+            className="flex-1 bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark disabled:bg-text-secondary/50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md"
           >
             {loading ? 'Creating...' : 'Create Transaction'}
           </button>
           <button
             type="button"
             onClick={onCancel}
-            className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+            className="px-6 py-2 border-2 border-gray-300 text-text-secondary rounded-lg hover:bg-background hover:border-text-secondary transition-all"
           >
             Cancel
           </button>

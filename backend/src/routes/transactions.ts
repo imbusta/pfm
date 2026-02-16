@@ -25,7 +25,16 @@ router.get('/', async (_req: Request, res: Response) => {
 // GET /api/transactions/:id - Get single transaction
 router.get('/:id', async (req: Request, res: Response) => {
   try {
-    const transaction = await TransactionModel.findById(req.params.id);
+    const id = parseInt(req.params.id, 10);
+    if (isNaN(id)) {
+      res.status(400).json({
+        success: false,
+        error: 'Invalid transaction ID',
+      });
+      return;
+    }
+
+    const transaction = await TransactionModel.findById(id);
     if (!transaction) {
       res.status(404).json({
         success: false,
@@ -77,12 +86,21 @@ router.post('/', async (req: Request, res: Response) => {
 // PUT /api/transactions/:id - Update transaction
 router.put('/:id', async (req: Request, res: Response) => {
   try {
+    const id = parseInt(req.params.id, 10);
+    if (isNaN(id)) {
+      res.status(400).json({
+        success: false,
+        error: 'Invalid transaction ID',
+      });
+      return;
+    }
+
     const data: Partial<TransactionCreate> = {
       ...req.body,
       date: req.body.date ? new Date(req.body.date) : undefined,
     };
 
-    const transaction = await TransactionModel.update(req.params.id, data);
+    const transaction = await TransactionModel.update(id, data);
     if (!transaction) {
       res.status(404).json({
         success: false,
@@ -107,7 +125,16 @@ router.put('/:id', async (req: Request, res: Response) => {
 // DELETE /api/transactions/:id - Delete transaction
 router.delete('/:id', async (req: Request, res: Response) => {
   try {
-    const deleted = await TransactionModel.delete(req.params.id);
+    const id = parseInt(req.params.id, 10);
+    if (isNaN(id)) {
+      res.status(400).json({
+        success: false,
+        error: 'Invalid transaction ID',
+      });
+      return;
+    }
+
+    const deleted = await TransactionModel.delete(id);
     if (!deleted) {
       res.status(404).json({
         success: false,
