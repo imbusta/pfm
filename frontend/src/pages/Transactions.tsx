@@ -1,13 +1,20 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { transactionsApi } from '../api/client';
-import type { Transaction, TransactionCreate } from '../types';
+import type { Transaction, TransactionCreate, TransactionFilters } from '../types';
 import TransactionList from '../components/TransactionList';
 import TransactionForm from '../components/TransactionForm';
+import TransactionFiltersComponent from '../components/TransactionFilters';
 
 export default function Transactions() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [filters, setFilters] = useState<TransactionFilters>({
+    searchText: '',
+    category: '',
+    startDate: '',
+    endDate: '',
+  });
 
   useEffect(() => {
     loadTransactions();
@@ -45,6 +52,43 @@ export default function Transactions() {
     }
   };
 
+  // Extract available categories from transactions
+  const availableCategories = useMemo(() => {
+    const categories = transactions
+      .map((t) => t.category)
+      .filter((c): c is string => !!c);
+    return Array.from(new Set(categories)).sort();
+  }, [transactions]);
+
+  // Filter transactions based on current filters
+  const filteredTransactions = useMemo(() => {
+    return transactions.filter((transaction) => {
+      // Filter by search text (case-insensitive description match)
+      if (
+        filters.searchText &&
+        !transaction.description.toLowerCase().includes(filters.searchText.toLowerCase())
+      ) {
+        return false;
+      }
+
+      // Filter by category
+      if (filters.category && transaction.category !== filters.category) {
+        return false;
+      }
+
+      // Filter by date range
+      const txDate = new Date(transaction.date);
+      if (filters.startDate && txDate < new Date(filters.startDate)) {
+        return false;
+      }
+      if (filters.endDate && txDate > new Date(filters.endDate)) {
+        return false;
+      }
+
+      return true;
+    });
+  }, [transactions, filters]);
+
   return (
     <div className="px-4 py-6">
       <div className="flex justify-between items-center mb-6">
@@ -63,12 +107,20 @@ export default function Transactions() {
         </div>
       )}
 
+      {!loading && (
+        <TransactionFiltersComponent
+          filters={filters}
+          onFilterChange={setFilters}
+          availableCategories={availableCategories}
+        />
+      )}
+
       {loading ? (
         <div className="flex justify-center items-center h-64">
           <div className="text-text-secondary">Loading...</div>
         </div>
       ) : (
-        <TransactionList transactions={transactions} onDelete={handleDelete} />
+        <TransactionList transactions={filteredTransactions} onDelete={handleDelete} />
       )}
     </div>
   );

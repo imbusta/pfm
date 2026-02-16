@@ -88,3 +88,10 @@ export interface ApiResponse<T = any> {
   error?: string;
   message?: string;
 }
+
+export interface TransactionFilters {
+  searchText: string;
+  category: string;
+  startDate: string;
+  endDate: string;
+}
