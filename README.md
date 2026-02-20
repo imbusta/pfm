@@ -15,13 +15,11 @@ This project provides a comprehensive personal finance management platform that 
 
 ## Project Structure
 
-```
 pfm/
 ├── backend/          # Express API server
 ├── frontend/         # React web application
 ├── shared/           # Shared TypeScript types
-└── docs/             # Documentation
-```
+└── docs/             # Markdowns for agents
 
 ## Prerequisites
 
@@ -52,6 +50,7 @@ cp .env.example .env
 ```
 
 Required environment variables:
+
 - `ANTHROPIC_API_KEY`: Your Claude AI API key
 - `PORT`: Backend server port (default: 3000)
 - `NODE_ENV`: Environment (development/production)
@@ -111,29 +110,6 @@ Common TypeScript types and interfaces are defined in the `shared/` package and 
 - `npm run build` - Build both projects for production
 - `npm run test` - Run all tests
 - `npm run clean` - Remove all node_modules and build artifacts
-
-## Features
-
-### Current
-- Transaction management
-- AI-powered transaction classification
-- Spending analytics and visualizations
-- Budget planning assistance
-- Natural language financial Q&A
-
-### Planned
-- PostgreSQL database integration
-- Recurring transaction detection
-- Goal tracking and progress
-- Multi-currency support
-- Export and reporting
-
-## Documentation
-
-- [Context & Requirements](./docs/00-context.md)
-- [Agent Architecture](./docs/AGENT.md)
-- [API Documentation](./backend/README.md)
-- [Frontend Guide](./frontend/README.md)
 
 ## Contributing
 
