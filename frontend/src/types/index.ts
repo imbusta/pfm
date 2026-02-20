@@ -3,8 +3,8 @@ export interface Transaction {
   date: Date | string;
   description: string;
   amount: number;
-  category?: string;
-  subcategory?: string;
+  category_name?: string;
+  subcategory_name?: string;
   type: 'income' | 'expense';
   source?: string;
   notes?: string;
@@ -17,8 +17,8 @@ export interface TransactionCreate {
   date: Date | string;
   description: string;
   amount: number;
-  category?: string;
-  subcategory?: string;
+  category_name?: string;
+  subcategory_name?: string;
   type: 'income' | 'expense';
   source?: string;
   notes?: string;

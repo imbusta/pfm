@@ -46,7 +46,7 @@ export default function TransactionList({ transactions, onDelete }: TransactionL
                 {transaction.description}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-text-secondary">
-                {transaction.category || 'Uncategorized'}
+                {transaction.category_name || 'Uncategorized'}
               </td>
               <td
                 className={`px-6 py-4 whitespace-nowrap text-sm font-semibold ${

@@ -55,7 +55,7 @@ export default function Transactions() {
   // Extract available categories from transactions
   const availableCategories = useMemo(() => {
     const categories = transactions
-      .map((t) => t.category)
+      .map((t) => t.category_name)
       .filter((c): c is string => !!c);
     return Array.from(new Set(categories)).sort();
   }, [transactions]);
@@ -72,7 +72,7 @@ export default function Transactions() {
       }
 
       // Filter by category
-      if (filters.category && transaction.category !== filters.category) {
+      if (filters.category && transaction.category_name !== filters.category) {
         return false;
       }
 
