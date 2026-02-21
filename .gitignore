@@ -43,3 +43,6 @@ Thumbs.db
 #Agents Markdown files
 docs/
 docs/**
+
+# Labs (backend experiments/notebooks)
+backend/labs/
