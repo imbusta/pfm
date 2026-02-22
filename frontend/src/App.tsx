@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, NavLink } from 'react-router-dom';
 import Dashboard from './pages/Dashboard';
 import Transactions from './pages/Transactions';
 import Analytics from './pages/Analytics';
@@ -17,36 +17,67 @@ function App() {
                   <h1 className="text-xl font-bold text-primary">💰 Finance Copilot</h1>
                 </div>
                 <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
-                  <Link
+                  <NavLink
                     to="/"
-                    className="inline-flex items-center px-1 pt-1 text-sm font-medium text-text-primary border-b-2 border-primary hover:border-primary-dark transition-colors"
+                    end
+                    className={({ isActive }) =>
+                      `inline-flex items-center px-1 pt-1 text-sm font-medium border-b-2 transition-colors ${
+                        isActive
+                          ? 'text-text-primary border-primary hover:border-primary-dark'
+                          : 'text-text-secondary border-transparent hover:text-text-primary hover:border-primary/50'
+                      }`
+                    }
                   >
                     Dashboard
-                  </Link>
-                  <Link
+                  </NavLink>
+                  <NavLink
                     to="/transactions"
-                    className="inline-flex items-center px-1 pt-1 text-sm font-medium text-text-secondary hover:text-text-primary border-b-2 border-transparent hover:border-primary/50 transition-colors"
+                    className={({ isActive }) =>
+                      `inline-flex items-center px-1 pt-1 text-sm font-medium border-b-2 transition-colors ${
+                        isActive
+                          ? 'text-text-primary border-primary hover:border-primary-dark'
+                          : 'text-text-secondary border-transparent hover:text-text-primary hover:border-primary/50'
+                      }`
+                    }
                   >
                     Transactions
-                  </Link>
-                  <Link
+                  </NavLink>
+                  <NavLink
                     to="/analytics"
-                    className="inline-flex items-center px-1 pt-1 text-sm font-medium text-text-secondary hover:text-text-primary border-b-2 border-transparent hover:border-primary/50 transition-colors"
+                    className={({ isActive }) =>
+                      `inline-flex items-center px-1 pt-1 text-sm font-medium border-b-2 transition-colors ${
+                        isActive
+                          ? 'text-text-primary border-primary hover:border-primary-dark'
+                          : 'text-text-secondary border-transparent hover:text-text-primary hover:border-primary/50'
+                      }`
+                    }
                   >
                     Analytics
-                  </Link>
-                  <Link
+                  </NavLink>
+                  <NavLink
                     to="/budget"
-                    className="inline-flex items-center px-1 pt-1 text-sm font-medium text-text-secondary hover:text-text-primary border-b-2 border-transparent hover:border-primary/50 transition-colors"
+                    className={({ isActive }) =>
+                      `inline-flex items-center px-1 pt-1 text-sm font-medium border-b-2 transition-colors ${
+                        isActive
+                          ? 'text-text-primary border-primary hover:border-primary-dark'
+                          : 'text-text-secondary border-transparent hover:text-text-primary hover:border-primary/50'
+                      }`
+                    }
                   >
                     Budget
-                  </Link>
-                  <Link
+                  </NavLink>
+                  <NavLink
                     to="/chat"
-                    className="inline-flex items-center px-1 pt-1 text-sm font-medium text-text-secondary hover:text-text-primary border-b-2 border-transparent hover:border-primary/50 transition-colors"
+                    className={({ isActive }) =>
+                      `inline-flex items-center px-1 pt-1 text-sm font-medium border-b-2 transition-colors ${
+                        isActive
+                          ? 'text-text-primary border-primary hover:border-primary-dark'
+                          : 'text-text-secondary border-transparent hover:text-text-primary hover:border-primary/50'
+                      }`
+                    }
                   >
                     💬 Chat
-                  </Link>
+                  </NavLink>
                 </div>
               </div>
             </div>

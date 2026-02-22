@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import type { TransactionCreate } from '../types';
+import { useState, useEffect } from 'react';
+import type { TransactionCreate, Category } from '../types';
+import { categoriesApi } from '../api/client';
 
 interface TransactionFormProps {
   onSubmit: (data: TransactionCreate) => Promise<void>;
@@ -7,15 +8,20 @@ interface TransactionFormProps {
 }
 
 export default function TransactionForm({ onSubmit, onCancel }: TransactionFormProps) {
-  const [formData, setFormData] = useState<TransactionCreate>({
+  const [formData, setFormData] = useState<TransactionCreate & { category?: string }>({
     date: new Date().toISOString().split('T')[0],
     description: '',
     amount: 0,
     type: 'expense',
     category: '',
   });
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    categoriesApi.getAll().then(setCategories).catch(() => {});
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -110,13 +116,18 @@ export default function TransactionForm({ onSubmit, onCancel }: TransactionFormP
             <label className="block text-sm font-medium text-text-primary mb-1">
               Category <span className="text-text-secondary text-xs">(optional)</span>
             </label>
-            <input
-              type="text"
+            <select
               value={formData.category || ''}
               onChange={(e) => setFormData({ ...formData, category: e.target.value })}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
-              placeholder="Auto-classify if empty"
-            />
+            >
+              <option value="">Auto-detect</option>
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.name}>
+                  {cat.name}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 

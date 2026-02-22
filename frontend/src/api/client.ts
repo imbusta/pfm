@@ -3,6 +3,8 @@ import type {
   Transaction,
   TransactionCreate,
   Budget,
+  BudgetCategory,
+  Category,
   Goal,
   SpendingSummary,
   CategoryBreakdown,
@@ -90,14 +92,46 @@ export const analyticsApi = {
 
 // Budget API
 export const budgetApi = {
-  getAll: async (): Promise<Budget[]> => {
-    const response = await client.get<ApiResponse<Budget[]>>('/budget');
+  getAll: async (year?: number, month?: number): Promise<Budget[]> => {
+    const response = await client.get<ApiResponse<Budget[]>>('/budget', {
+      params: year !== undefined && month !== undefined ? { year, month } : undefined,
+    });
     return response.data.data || [];
   },
 
-  create: async (data: Omit<Budget, 'id' | 'createdAt' | 'updatedAt'>): Promise<Budget> => {
+  getById: async (id: number): Promise<Budget> => {
+    const response = await client.get<ApiResponse<Budget>>(`/budget/${id}`);
+    return response.data.data!;
+  },
+
+  create: async (data: { year: number; month: number }): Promise<Budget> => {
     const response = await client.post<ApiResponse<Budget>>('/budget', data);
     return response.data.data!;
+  },
+
+  delete: async (id: number): Promise<void> => {
+    await client.delete(`/budget/${id}`);
+  },
+
+  addCategory: async (budgetId: number, data: { category_id: number; amount: number }): Promise<BudgetCategory> => {
+    const response = await client.post<ApiResponse<BudgetCategory>>(`/budget/${budgetId}/categories`, data);
+    return response.data.data!;
+  },
+
+  updateCategory: async (
+    budgetId: number,
+    catId: number,
+    data: { amount?: number; total_spent?: number }
+  ): Promise<BudgetCategory> => {
+    const response = await client.put<ApiResponse<BudgetCategory>>(
+      `/budget/${budgetId}/categories/${catId}`,
+      data
+    );
+    return response.data.data!;
+  },
+
+  removeCategory: async (budgetId: number, catId: number): Promise<void> => {
+    await client.delete(`/budget/${budgetId}/categories/${catId}`);
   },
 
   getSuggestions: async (months: number = 3) => {
@@ -128,6 +162,14 @@ export const goalsApi = {
   getPlan: async (id: string) => {
     const response = await client.get(`/budget/goals/${id}/plan`);
     return response.data.data;
+  },
+};
+
+// Categories API
+export const categoriesApi = {
+  getAll: async (): Promise<Category[]> => {
+    const response = await client.get<ApiResponse<Category[]>>('/categories');
+    return response.data.data || [];
   },
 };
 

@@ -1,4 +1,4 @@
-import { Transaction, Budget, Goal } from '../types';
+import { Transaction, BudgetCategory, BudgetWithCategories, Goal } from '../types';
 import analyticsService from './analytics';
 
 interface BudgetSuggestion {
@@ -73,27 +73,28 @@ export class PlannerService {
     };
   }
 
-  optimizeBudget(budgets: Budget[], transactions: Transaction[]): Array<{ budget: Budget; recommendation: string }> {
-    const lastMonth = this.getRecentTransactions(transactions, 1);
-    const breakdown = analyticsService.calculateCategoryBreakdown(lastMonth);
+  optimizeBudget(
+    budgets: BudgetWithCategories[]
+  ): Array<{ budget: BudgetWithCategories; category: BudgetCategory; recommendation: string }> {
+    const results: Array<{ budget: BudgetWithCategories; category: BudgetCategory; recommendation: string }> = [];
 
-    return budgets.map(budget => {
-      const actual = breakdown.find(b => b.category === budget.category);
-      const actualAmount = actual ? actual.amount : 0;
-
-      let recommendation: string;
-      if (actualAmount === 0) {
-        recommendation = 'No spending in this category last month';
-      } else if (actualAmount > budget.amount * 1.2) {
-        recommendation = `Consider increasing budget to $${Math.ceil(actualAmount)}`;
-      } else if (actualAmount < budget.amount * 0.5) {
-        recommendation = `Consider decreasing budget to $${Math.ceil(actualAmount * 1.2)}`;
-      } else {
-        recommendation = 'Budget is appropriately set';
+    for (const budget of budgets) {
+      for (const bc of budget.categories) {
+        let recommendation: string;
+        if (bc.total_spent === 0) {
+          recommendation = 'No spending recorded for this category';
+        } else if (bc.total_spent > bc.amount * 1.2) {
+          recommendation = `Over budget — consider increasing allocation to $${Math.ceil(bc.total_spent)}`;
+        } else if (bc.total_spent < bc.amount * 0.5) {
+          recommendation = `Under-utilized — consider reducing allocation to $${Math.ceil(bc.total_spent * 1.2)}`;
+        } else {
+          recommendation = 'Budget is appropriately set';
+        }
+        results.push({ budget, category: bc, recommendation });
       }
+    }
 
-      return { budget, recommendation };
-    });
+    return results;
   }
 
   private getRecentTransactions(transactions: Transaction[], months: number): Transaction[] {

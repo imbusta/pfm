@@ -25,15 +25,20 @@ export interface TransactionCreate {
   tags?: string[];
 }
 
-export interface Budget {
-  id: string;
-  category: string;
+export interface BudgetCategory {
+  id: number;
+  budget_id: number;
+  category_id: number;
   amount: number;
-  period: 'weekly' | 'monthly' | 'yearly';
-  startDate: Date | string;
-  endDate?: Date | string;
-  createdAt: Date | string;
-  updatedAt: Date | string;
+  total_spent: number;
+  category_name?: string;
+}
+
+export interface Budget {
+  id: number;
+  year: number;
+  month: number;
+  categories: BudgetCategory[];
 }
 
 export interface Goal {
@@ -94,4 +99,11 @@ export interface TransactionFilters {
   category: string;
   startDate: string;
   endDate: string;
+}
+
+export interface Category {
+  id: number;
+  name: string;
+  created_at: string;
+  updated_at: string;
 }

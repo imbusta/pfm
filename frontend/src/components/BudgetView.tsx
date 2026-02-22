@@ -5,6 +5,17 @@ interface BudgetViewProps {
   goals: Goal[];
 }
 
+const MONTH_NAMES = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
+];
+
+function getProgressColor(pct: number): string {
+  if (pct > 100) return 'bg-red-500';
+  if (pct >= 80) return 'bg-yellow-400';
+  return 'bg-green-500';
+}
+
 export default function BudgetView({ budgets, goals }: BudgetViewProps) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -14,18 +25,44 @@ export default function BudgetView({ budgets, goals }: BudgetViewProps) {
         {budgets.length === 0 ? (
           <p className="text-text-secondary">No budgets created yet</p>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-6">
             {budgets.map((budget) => (
-              <div key={budget.id} className="border-b border-gray-200 pb-4 last:border-b-0">
-                <div className="flex justify-between items-center">
-                  <span className="font-medium text-text-primary">{budget.category}</span>
-                  <span className="text-sm text-primary font-semibold">
-                    ${budget.amount}/{budget.period}
-                  </span>
-                </div>
-                <div className="text-xs text-text-secondary mt-1">
-                  Started: {new Date(budget.startDate).toLocaleDateString()}
-                </div>
+              <div key={budget.id}>
+                <h3 className="font-semibold text-text-primary mb-3">
+                  {MONTH_NAMES[budget.month - 1]} {budget.year}
+                </h3>
+                {budget.categories.length === 0 ? (
+                  <p className="text-sm text-text-secondary">No categories added yet</p>
+                ) : (
+                  <div className="space-y-3">
+                    {budget.categories.map((bc) => {
+                      const pct = bc.amount > 0 ? (bc.total_spent / bc.amount) * 100 : 0;
+                      return (
+                        <div key={bc.id}>
+                          <div className="flex justify-between items-center mb-1">
+                            <span className="text-sm font-medium text-text-primary">
+                              {bc.category_name ?? `Category ${bc.category_id}`}
+                            </span>
+                            <span className="text-sm text-text-secondary">
+                              ${bc.total_spent.toFixed(2)} / ${bc.amount.toFixed(2)}
+                            </span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
+                            <div
+                              className={`h-2.5 rounded-full transition-all duration-500 ${getProgressColor(pct)}`}
+                              style={{ width: `${Math.min(pct, 100)}%` }}
+                            />
+                          </div>
+                          <div className="text-xs text-text-secondary mt-0.5 text-right">
+                            {pct > 100
+                              ? `Over budget by $${(bc.total_spent - bc.amount).toFixed(2)}`
+                              : `$${(bc.amount - bc.total_spent).toFixed(2)} remaining`}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             ))}
           </div>

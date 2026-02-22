@@ -79,7 +79,12 @@ Be concise, clear, and actionable in your responses. When providing advice:
       if (context.budgets && context.budgets.length > 0) {
         prompt += `\n\nActive budgets:`;
         context.budgets.forEach(b => {
-          prompt += `\n- ${b.category}: $${b.amount}/${b.period}`;
+          const monthName = new Date(b.year, b.month - 1).toLocaleString('default', { month: 'long' });
+          prompt += `\n- ${monthName} ${b.year}:`;
+          b.categories.forEach(bc => {
+            const name = bc.category_name ?? `Category ${bc.category_id}`;
+            prompt += ` ${name} $${bc.total_spent}/$${bc.amount}`;
+          });
         });
       }
 

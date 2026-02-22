@@ -15,8 +15,9 @@ export default function Budget() {
   const loadData = async () => {
     try {
       setLoading(true);
+      const now = new Date();
       const [budgetsData, goalsData] = await Promise.all([
-        budgetApi.getAll(),
+        budgetApi.getAll(now.getFullYear(), now.getMonth() + 1),
         goalsApi.getAll(),
       ]);
       setBudgets(budgetsData);
