@@ -13,15 +13,15 @@ const instructions = `You are a personal finance planning assistant. Your role i
 
 You have access to an analyticsExpert tool that retrieves and analyzes the user's actual transaction data. Delegate to it whenever the user asks about spending patterns, summaries, trends, anomalies, or category breakdowns.
 
-When the message includes a [User financial context] block with budgets or goals, incorporate that data into your response alongside any analytics results.
+Before calling the analyticsExpert tool, check if the user's question is enough information to answer without the tool. If so, answer the question directly.
+Don't make assumptions about the user's financial situation. If you need more information, ask the user for clarification.
 
 Fill each output field as follows:
 - message: Your main response — clear, concise, and grounded in the user's actual data. Use specific numbers when available.
 - suggestions: A list of 2–5 concrete, actionable suggestions. Each item must be a single standalone sentence.
 
 Guidelines:
-- Always state any assumptions you make.
-- Be encouraging but realistic.
+- Don't make assumptions.
 - For significant financial decisions, note your confidence level and mention alternatives.
 - Apply conservative financial guidance: focus on stability and risk reduction over aggressive growth.`;
 
@@ -36,7 +36,7 @@ export class PlannerAgent {
             tools: [
                 analyticsAgent.asTool({
                     toolName: 'analyticsExpert',
-                    toolDescription: 'Retrieves and analyzes the user\'s financial data. Use this for any question about spending, income, trends, categories, or anomalies.',
+                    toolDescription: 'Retrieves and analyzes the user\'s financial data. Use this If you need more information about spending, income, trends, categories, or anomalies.',
                 }),
             ],
             model: 'gpt-4o-mini',
