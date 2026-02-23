@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import agentService from '../services/agent';
+import plannerAgent from '../services/agents/plannerAgent';
 import TransactionModel from '../models/Transaction';
 import BudgetModel from '../models/Budget';
 import GoalModel from '../models/Goal';
@@ -10,7 +10,7 @@ const router = Router();
 // POST /api/agent/chat - Chat with AI agent
 router.post('/chat', async (req: Request, res: Response) => {
   try {
-    const { message, includeContext = true } = req.body;
+    const { message, includeContext = false } = req.body;
 
     if (!message) {
       res.status(400).json({
@@ -20,24 +20,23 @@ router.post('/chat', async (req: Request, res: Response) => {
       return;
     }
 
-    const request: AgentRequest = {
-      message,
-    };
+    const request: AgentRequest = { message };
 
-    // Include user's financial context if requested
     if (includeContext) {
-      const transactions = await TransactionModel.findAll();
-      const budgets = await BudgetModel.findAll();
-      const goals = await GoalModel.findAll();
+      const [transactions, budgets, goals] = await Promise.all([
+        TransactionModel.findAll(),
+        BudgetModel.findAll(),
+        GoalModel.findAll(),
+      ]);
 
       request.context = {
-        transactions: transactions.slice(-100), // Last 100 transactions
+        transactions: transactions.slice(-100),
         budgets,
         goals,
       };
     }
 
-    const response = await agentService.chat(request);
+    const response = await plannerAgent.chat(request);
 
     res.json({
       success: true,
@@ -58,7 +57,6 @@ router.post('/analyze', async (req: Request, res: Response) => {
 
     let transactions = await TransactionModel.findAll();
 
-    // Filter transactions
     if (category) {
       transactions = transactions.filter(t => t.category_name === category);
     }
@@ -73,7 +71,7 @@ router.post('/analyze', async (req: Request, res: Response) => {
       context: { transactions },
     };
 
-    const response = await agentService.chat(request);
+    const response = await plannerAgent.chat(request);
 
     res.json({
       success: true,
