@@ -2,6 +2,7 @@ import { Agent, run } from '@openai/agents';
 import { z } from 'zod';
 import { AgentRequest, AgentResponse } from '../../types';
 import { analyticsAgent } from './analyticsAgent';
+import { budgetsAgent } from './budgetsAgent';
 
 
 const PlannerOutput = z.object({
@@ -34,6 +35,10 @@ export class PlannerAgent {
             name: 'Planner Agent',
             instructions,
             tools: [
+                budgetsAgent.asTool({
+                    toolName: 'budgetsExpert',
+                    toolDescription: 'Retrieves and analyzes the user\'s financial data. Use this for any question about budgets and goals.',
+                }),
                 analyticsAgent.asTool({
                     toolName: 'analyticsExpert',
                     toolDescription: 'Retrieves and analyzes the user\'s financial data. Use this If you need more information about spending, income, trends, categories, or anomalies.',
