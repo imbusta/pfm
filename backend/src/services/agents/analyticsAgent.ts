@@ -29,7 +29,7 @@ const calculate_summary_tool = tool({
     description: 'Calculate the income, expense, and net amount summary for the last 30 days.',
     parameters: z.object({}),
     async execute() {
-        const transactions = await TransactionModel.findAll();
+        const { rows: transactions } = await TransactionModel.findAll();
         const endDate = new Date();
         const startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
         return analyticsService.calculateSummary(transactions, startDate, endDate);
@@ -41,7 +41,7 @@ const calculate_category_breakdown_tool = tool({
     description: 'Calculate the expense breakdown by category across all transactions on record.',
     parameters: z.object({}),
     async execute() {
-        const transactions = await TransactionModel.findAll();
+        const { rows: transactions } = await TransactionModel.findAll();
         return analyticsService.calculateCategoryBreakdown(transactions);
     },
 });
@@ -51,7 +51,7 @@ const calculate_monthly_trends_tool = tool({
     description: 'Calculate month-by-month income and expense trends across all transactions on record.',
     parameters: z.object({}),
     async execute() {
-        const transactions = await TransactionModel.findAll();
+        const { rows: transactions } = await TransactionModel.findAll();
         return analyticsService.calculateMonthlyTrends(transactions);
     },
 });
@@ -61,7 +61,7 @@ const calculate_monthly_trends_tool = tool({
 //     description: 'Calculate the average transaction spending amount, optionally filtered by category.',
 //     parameters: z.object({ category: z.string().optional() }),
 //     async execute({ category }: { category?: string }) {
-//         const transactions = await TransactionModel.findAll();
+//         const { rows: transactions } = await TransactionModel.findAll();
 //         return analyticsService.calculateAverageSpending(transactions, category);
 //     },
 // });
@@ -71,7 +71,7 @@ const calculate_monthly_trends_tool = tool({
 //     description: 'Detect unusually high or low transactions compared to the historical average, optionally filtered by category.',
 //     parameters: z.object({ category: z.string().optional() }),
 //     async execute({ category }: { category?: string }) {
-//         const transactions = await TransactionModel.findAll();
+//         const { rows: transactions } = await TransactionModel.findAll();
 //         return analyticsService.detectAnomalies(transactions, category);
 //     },
 // });

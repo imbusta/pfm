@@ -9,7 +9,15 @@ export class BudgetModel {
         bc.id AS bc_id,
         bc.category_id,
         bc.amount,
-        bc.total_spent,
+        COALESCE((
+          SELECT SUM(ABS(t.amount))
+          FROM transactions t
+          WHERE t.category_id = bc.category_id
+            AND EXTRACT(YEAR FROM t.date) = b.year
+            AND EXTRACT(MONTH FROM t.date) = b.month
+            AND t.deleted_at IS NULL
+            AND t.type = 'expense'
+        ), 0) AS total_spent,
         c.name AS category_name
       FROM budgets b
       LEFT JOIN budget_categories bc ON bc.budget_id = b.id

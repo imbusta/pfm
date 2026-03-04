@@ -1,6 +1,14 @@
-import { Agent, run } from '@openai/agents';
+import { Agent, run, RunItemStreamEvent, RunAgentUpdatedStreamEvent } from '@openai/agents';
 import { z } from 'zod';
 import { AgentRequest, AgentResponse } from '../../types';
+
+export type StreamChunk =
+    | { type: 'agent'; name: string }
+    | { type: 'tool_start'; name: string }
+    | { type: 'tool_done'; name: string }
+    | { type: 'token'; text: string }
+    | { type: 'done'; suggestions: string[] }
+    | { type: 'error'; message: string };
 import { analyticsAgent } from './analyticsAgent';
 import { budgetsAgent } from './budgetsAgent';
 
@@ -18,8 +26,8 @@ Before calling the analyticsExpert tool, check if the user's question is enough 
 Don't make assumptions about the user's financial situation. If you need more information, ask the user for clarification.
 
 Fill each output field as follows:
-- message: Your main response — clear, concise, and grounded in the user's actual data. Use specific numbers when available.
-- suggestions: A list of 2–5 concrete, actionable suggestions. Each item must be a single standalone sentence.
+- message: Your main response in **Markdown format** — use headers (##), bold, bullet lists, and tables where they add clarity. Be concise and ground your answer in the user's actual data with specific numbers.
+- suggestions: A list of 2–5 concrete, actionable follow-up questions or actions. Each item must be a single standalone sentence.
 
 Guidelines:
 - Don't make assumptions.
@@ -47,6 +55,47 @@ export class PlannerAgent {
             model: 'gpt-4o-mini',
             outputType: PlannerOutput,
         });
+    }
+
+    async *chatStream(request: AgentRequest): AsyncGenerator<StreamChunk> {
+        const input = request.context
+            ? this.buildContextMessage(request.message, request.context)
+            : request.message;
+
+        try {
+            const result = await run(this.agent, input, { stream: true });
+
+            for await (const event of result) {
+                if (event instanceof RunAgentUpdatedStreamEvent) {
+                    yield { type: 'agent', name: event.agent.name };
+                } else if (event instanceof RunItemStreamEvent) {
+                    if (event.name === 'tool_called') {
+                        const raw = (event.item as any).rawItem;
+                        const toolName = raw?.name ?? 'tool';
+                        yield { type: 'tool_start', name: toolName };
+                    } else if (event.name === 'tool_output') {
+                        const raw = (event.item as any).rawItem;
+                        const toolName = raw?.name ?? 'tool';
+                        yield { type: 'tool_done', name: toolName };
+                    }
+                }
+            }
+
+            const output = await result.finalOutput;
+            const message = output?.message ?? 'I could not process your request.';
+            const suggestions = output?.suggestions ?? [];
+
+            // Stream message word by word for typewriter effect
+            const words = message.split(' ');
+            for (const word of words) {
+                yield { type: 'token', text: word + ' ' };
+                await new Promise(r => setTimeout(r, 18));
+            }
+
+            yield { type: 'done', suggestions };
+        } catch (error) {
+            yield { type: 'error', message: error instanceof Error ? error.message : 'Unknown error' };
+        }
     }
 
     async chat(request: AgentRequest): Promise<AgentResponse> {

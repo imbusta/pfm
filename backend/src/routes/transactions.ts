@@ -2,19 +2,20 @@ import { Router, Request, Response } from 'express';
 import TransactionModel from '../models/Transaction';
 import BudgetModel from '../models/Budget';
 import classifierService from '../services/classifier';
-import { TransactionCreate, ApiResponse } from '../types';
+import { TransactionCreate } from '../types';
 
 const router = Router();
 
 // GET /api/transactions - Get all transactions
-router.get('/', async (_req: Request, res: Response) => {
+router.get('/', async (req: Request, res: Response) => {
   try {
-    const transactions = await TransactionModel.findAll();
-    const response: ApiResponse = {
-      success: true,
-      data: transactions,
-    };
-    res.json(response);
+    const page = Math.max(1, parseInt(req.query.page as string) || 1);
+    const limit = Math.max(1, parseInt(req.query.limit as string) || 20);
+    const offset = (page - 1) * limit;
+    const { search, category, startDate, endDate } = req.query as Record<string, string | undefined>;
+
+    const { rows, total } = await TransactionModel.findAll({ limit, offset, search, category, startDate, endDate });
+    res.json({ success: true, data: rows, total, page, limit });
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -120,6 +121,14 @@ router.put('/:id', async (req: Request, res: Response) => {
         error: 'Transaction not found',
       });
       return;
+    }
+
+    if (transaction.category_id && transaction.type === 'expense') {
+      const now = new Date();
+      const txDate = transaction.date instanceof Date ? transaction.date : new Date(transaction.date);
+      if (txDate.getFullYear() === now.getFullYear() && txDate.getMonth() === now.getMonth()) {
+        await BudgetModel.recalculateTotalSpent(now.getFullYear(), now.getMonth() + 1, transaction.category_id);
+      }
     }
 
     res.json({

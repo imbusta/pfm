@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
-import type { TransactionCreate, Category } from '../types';
+import type { Transaction, TransactionCreate, Category } from '../types';
 import { categoriesApi } from '../api/client';
 
 interface TransactionFormProps {
   onSubmit: (data: TransactionCreate) => Promise<void>;
   onCancel: () => void;
+  initialData?: Transaction;
 }
 
-export default function TransactionForm({ onSubmit, onCancel }: TransactionFormProps) {
+export default function TransactionForm({ onSubmit, onCancel, initialData }: TransactionFormProps) {
   const [formData, setFormData] = useState<TransactionCreate & { category?: string }>({
     date: new Date().toISOString().split('T')[0],
     description: '',
@@ -22,6 +23,21 @@ export default function TransactionForm({ onSubmit, onCancel }: TransactionFormP
   useEffect(() => {
     categoriesApi.getAll().then(setCategories).catch(() => {});
   }, []);
+
+  useEffect(() => {
+    if (initialData) {
+      const dateStr = typeof initialData.date === 'string'
+        ? initialData.date.split('T')[0]
+        : (initialData.date as Date).toISOString().split('T')[0];
+      setFormData({
+        date: dateStr,
+        description: initialData.description,
+        amount: Math.abs(initialData.amount),
+        type: initialData.type,
+        category: initialData.category_name || '',
+      });
+    }
+  }, [initialData]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,7 +55,7 @@ export default function TransactionForm({ onSubmit, onCancel }: TransactionFormP
         amount: formData.type === 'expense' ? -Math.abs(formData.amount) : Math.abs(formData.amount),
       });
     } catch (err) {
-      setError('Failed to create transaction');
+      setError(initialData ? 'Failed to update transaction' : 'Failed to create transaction');
     } finally {
       setLoading(false);
     }
@@ -47,7 +63,7 @@ export default function TransactionForm({ onSubmit, onCancel }: TransactionFormP
 
   return (
     <div className="bg-surface rounded-lg shadow-md p-6 border border-gray-200">
-      <h2 className="text-xl font-semibold text-text-primary mb-4">New Transaction</h2>
+      <h2 className="text-xl font-semibold text-text-primary mb-4">{initialData ? 'Edit Transaction' : 'New Transaction'}</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         {error && (
           <div className="bg-danger/10 border border-danger text-danger p-3 rounded-lg">{error}</div>
@@ -137,7 +153,7 @@ export default function TransactionForm({ onSubmit, onCancel }: TransactionFormP
             disabled={loading}
             className="flex-1 bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark disabled:bg-text-secondary/50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md"
           >
-            {loading ? 'Creating...' : 'Create Transaction'}
+            {loading ? (initialData ? 'Updating...' : 'Creating...') : (initialData ? 'Update Transaction' : 'Create Transaction')}
           </button>
           <button
             type="button"

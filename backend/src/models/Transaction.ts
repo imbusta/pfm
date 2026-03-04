@@ -20,14 +20,55 @@ export class TransactionModel {
     `;
   }
 
-  static async findAll(): Promise<Transaction[]> {
-    const query = `
+  static async findAll(opts?: {
+    limit?: number;
+    offset?: number;
+    search?: string;
+    category?: string;
+    startDate?: string;
+    endDate?: string;
+  }): Promise<{ rows: Transaction[]; total: number }> {
+    const conditions: string[] = ['t.deleted_at IS NULL'];
+    const values: any[] = [];
+    let idx = 1;
+
+    if (opts?.search) {
+      conditions.push(`t.description ILIKE $${idx++}`);
+      values.push(`%${opts.search}%`);
+    }
+    if (opts?.category) {
+      conditions.push(`LOWER(c.name) = LOWER($${idx++})`);
+      values.push(opts.category);
+    }
+    if (opts?.startDate) {
+      conditions.push(`t.date >= $${idx++}`);
+      values.push(opts.startDate);
+    }
+    if (opts?.endDate) {
+      conditions.push(`t.date <= $${idx++}`);
+      values.push(opts.endDate);
+    }
+
+    const where = `WHERE ${conditions.join(' AND ')}`;
+
+    const countResult = await db.query(
+      `SELECT COUNT(*) FROM transactions t LEFT JOIN categories c ON t.category_id = c.id ${where}`,
+      values
+    );
+    const total = parseInt(countResult.rows[0].count, 10);
+
+    const limit = opts?.limit ?? 20;
+    const offset = opts?.offset ?? 0;
+    const dataValues = [...values, limit, offset];
+
+    const dataQuery = `
       ${this.getBaseQuery()}
-      WHERE t.deleted_at IS NULL
+      ${where}
       ORDER BY t.date DESC, t.created_at DESC
+      LIMIT $${idx++} OFFSET $${idx++}
     `;
-    const result = await db.query(query);
-    return result.rows;
+    const result = await db.query(dataQuery, dataValues);
+    return { rows: result.rows, total };
   }
 
   static async findById(id: number): Promise<Transaction | null> {

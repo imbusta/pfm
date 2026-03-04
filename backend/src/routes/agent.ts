@@ -1,8 +1,5 @@
 import { Router, Request, Response } from 'express';
-import plannerAgent from '../services/agents/plannerAgent';
-import TransactionModel from '../models/Transaction';
-import BudgetModel from '../models/Budget';
-import GoalModel from '../models/Goal';
+import plannerAgent, { StreamChunk } from '../services/agents/plannerAgent';
 import { AgentRequest } from '../types';
 
 const router = Router();
@@ -10,7 +7,7 @@ const router = Router();
 // POST /api/agent/chat - Chat with AI agent
 router.post('/chat', async (req: Request, res: Response) => {
   try {
-    const { message, includeContext = false } = req.body;
+    const { message } = req.body;
 
     if (!message) {
       res.status(400).json({
@@ -21,21 +18,6 @@ router.post('/chat', async (req: Request, res: Response) => {
     }
 
     const request: AgentRequest = { message };
-
-    if (includeContext) {
-      const [transactions, budgets, goals] = await Promise.all([
-        TransactionModel.findAll(),
-        BudgetModel.findAll(),
-        GoalModel.findAll(),
-      ]);
-
-      request.context = {
-        transactions: transactions.slice(-100),
-        budgets,
-        goals,
-      };
-    }
-
     const response = await plannerAgent.chat(request);
 
     res.json({
@@ -50,33 +32,49 @@ router.post('/chat', async (req: Request, res: Response) => {
   }
 });
 
+// POST /api/agent/stream - Chat with SSE streaming
+router.post('/stream', async (req: Request, res: Response) => {
+  const { message } = req.body;
+
+  if (!message) {
+    res.status(400).json({ success: false, error: 'Message is required' });
+    return;
+  }
+
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.flushHeaders();
+
+  const send = (chunk: StreamChunk) => res.write(`data: ${JSON.stringify(chunk)}\n\n`);
+
+  try {
+    const request: AgentRequest = { message };
+
+    for await (const chunk of plannerAgent.chatStream(request)) {
+      send(chunk);
+      if (chunk.type === 'done' || chunk.type === 'error') break;
+    }
+  } catch (error) {
+    send({ type: 'error', message: error instanceof Error ? error.message : 'Stream error' });
+  } finally {
+    res.end();
+  }
+});
+
 // POST /api/agent/analyze - Analyze specific transactions or categories
 router.post('/analyze', async (req: Request, res: Response) => {
   try {
     const { category, startDate, endDate, question } = req.body;
 
-    let transactions = await TransactionModel.findAll();
+    const parts: string[] = [question || 'Analyze these transactions and provide insights.'];
+    if (category) parts.push(`Focus on the category: ${category}.`);
+    if (startDate && endDate) parts.push(`Date range: ${startDate} to ${endDate}.`);
 
-    if (category) {
-      transactions = transactions.filter(t => t.category_name === category);
-    }
-    if (startDate && endDate) {
-      const start = new Date(startDate);
-      const end = new Date(endDate);
-      transactions = transactions.filter(t => t.date >= start && t.date <= end);
-    }
-
-    const request: AgentRequest = {
-      message: question || 'Analyze these transactions and provide insights.',
-      context: { transactions },
-    };
-
+    const request: AgentRequest = { message: parts.join(' ') };
     const response = await plannerAgent.chat(request);
 
-    res.json({
-      success: true,
-      data: response,
-    });
+    res.json({ success: true, data: response });
   } catch (error) {
     res.status(500).json({
       success: false,

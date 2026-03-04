@@ -3,9 +3,10 @@ import type { Transaction } from '../types';
 interface TransactionListProps {
   transactions: Transaction[];
   onDelete: (id: string) => void;
+  onEdit: (tx: Transaction) => void;
 }
 
-export default function TransactionList({ transactions, onDelete }: TransactionListProps) {
+export default function TransactionList({ transactions, onDelete, onEdit }: TransactionListProps) {
   if (transactions.length === 0) {
     return (
       <div className="bg-surface rounded-lg shadow-md p-6 text-center text-text-secondary border border-gray-200">
@@ -57,12 +58,20 @@ export default function TransactionList({ transactions, onDelete }: TransactionL
                 {Math.abs(transaction.amount).toFixed(2)}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm">
-                <button
-                  onClick={() => onDelete(transaction.id)}
-                  className="text-danger hover:text-danger-dark font-medium transition-colors"
-                >
-                  Delete
-                </button>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => onEdit(transaction)}
+                    className="text-primary hover:text-primary-dark font-medium transition-colors"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => onDelete(transaction.id)}
+                    className="text-danger hover:text-danger-dark font-medium transition-colors"
+                  >
+                    Delete
+                  </button>
+                </div>
               </td>
             </tr>
           ))}

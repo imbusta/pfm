@@ -1,10 +1,12 @@
-import { useState } from 'react';
-import type { Budget, Goal, MonthlyTrend } from '../types';
+import { useEffect, useState } from 'react';
+import type { Budget, BudgetCategory, Goal, MonthlyTrend } from '../types';
+import { budgetApi } from '../api/client';
 
 interface BudgetViewProps {
   budgets: Budget[];
   goals: Goal[];
   trends: MonthlyTrend[];
+  onRefresh: () => void;
 }
 
 const MONTH_NAMES = [
@@ -60,7 +62,7 @@ function SliderHeader({ title, subtitle, index, total, onPrev, onNext }: SliderH
   );
 }
 
-export default function BudgetView({ budgets, goals, trends }: BudgetViewProps) {
+export default function BudgetView({ budgets, goals, trends, onRefresh }: BudgetViewProps) {
   // Trends sorted oldest first so right arrow → newer month
   const sortedTrends = [...trends].sort((a, b) => a.month.localeCompare(b.month));
 
@@ -82,8 +84,48 @@ export default function BudgetView({ budgets, goals, trends }: BudgetViewProps) 
   const [trendIndex, setTrendIndex] = useState(Math.max(0, sortedTrends.length - 1));
   const [budgetIndex, setBudgetIndex] = useState(initialBudgetIndex);
 
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editAmount, setEditAmount] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  // Reset editing state when navigating between budgets
+  useEffect(() => {
+    setEditingId(null);
+    setEditAmount('');
+  }, [budgetIndex]);
+
   const activeTrend = sortedTrends[trendIndex];
   const activeBudget = sortedBudgets[budgetIndex];
+
+  const startEdit = (bc: BudgetCategory) => {
+    setEditingId(bc.id);
+    setEditAmount(bc.amount.toFixed(2));
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditAmount('');
+  };
+
+  const saveEdit = async (bc: BudgetCategory, budgetId: number) => {
+    const amount = parseFloat(editAmount);
+    if (isNaN(amount) || amount < 0) return;
+    setSaving(true);
+    try {
+      await budgetApi.updateCategory(budgetId, bc.id, { amount });
+      setEditingId(null);
+      onRefresh();
+    } catch (err) {
+      console.error('Failed to update category amount:', err);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent, bc: BudgetCategory, budgetId: number) => {
+    if (e.key === 'Enter') saveEdit(bc, budgetId);
+    if (e.key === 'Escape') cancelEdit();
+  };
 
   return (
     <div className="space-y-6">
@@ -137,13 +179,13 @@ export default function BudgetView({ budgets, goals, trends }: BudgetViewProps) 
         <div className="bg-surface rounded-lg shadow-md p-6 border border-gray-200">
           {sortedBudgets.length === 0 ? (
             <>
-              <h2 className="text-xl font-semibold text-text-primary mb-4">📊 Budgets</h2>
+              <h2 className="text-xl font-semibold text-text-primary mb-4">Budgets</h2>
               <p className="text-text-secondary">No budgets created yet</p>
             </>
           ) : (
             <>
               <SliderHeader
-                title="📊 Budgets"
+                title="Budgets"
                 subtitle={(() => {
                   const isCurrent = activeBudget.year === currentYear && activeBudget.month === currentMonth;
                   return `${MONTH_NAMES[activeBudget.month - 1]} ${activeBudget.year}${isCurrent ? ' · Current' : ''}`;
@@ -159,15 +201,62 @@ export default function BudgetView({ budgets, goals, trends }: BudgetViewProps) 
                 <div className="space-y-3">
                   {activeBudget.categories.map((bc) => {
                     const pct = bc.amount > 0 ? (bc.total_spent / bc.amount) * 100 : 0;
+                    const isEditing = editingId === bc.id;
                     return (
                       <div key={bc.id}>
                         <div className="flex justify-between items-center mb-1">
                           <span className="text-sm font-medium text-text-primary">
                             {bc.category_name ?? `Category ${bc.category_id}`}
                           </span>
-                          <span className="text-sm text-text-secondary">
-                            ${bc.total_spent.toFixed(2)} / ${bc.amount.toFixed(2)}
-                          </span>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-sm text-text-secondary">
+                              ${bc.total_spent.toFixed(2)} /
+                            </span>
+                            {isEditing ? (
+                              <>
+                                <span className="text-sm text-text-secondary">$</span>
+                                <input
+                                  type="number"
+                                  value={editAmount}
+                                  onChange={(e) => setEditAmount(e.target.value)}
+                                  onKeyDown={(e) => handleKeyDown(e, bc, activeBudget.id)}
+                                  className="w-20 text-sm border border-gray-300 rounded px-1.5 py-0.5 focus:outline-none focus:ring-1 focus:ring-blue-400"
+                                  min="0"
+                                  step="0.01"
+                                  autoFocus
+                                />
+                                <button
+                                  onClick={() => saveEdit(bc, activeBudget.id)}
+                                  disabled={saving}
+                                  className="text-xs px-1.5 py-0.5 rounded bg-green-100 text-green-700 hover:bg-green-200 disabled:opacity-50 transition-colors"
+                                  title="Save"
+                                >
+                                  ✓
+                                </button>
+                                <button
+                                  onClick={cancelEdit}
+                                  disabled={saving}
+                                  className="text-xs px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 hover:bg-gray-200 disabled:opacity-50 transition-colors"
+                                  title="Cancel"
+                                >
+                                  ✕
+                                </button>
+                              </>
+                            ) : (
+                              <>
+                                <span className="text-sm text-text-secondary">
+                                  ${bc.amount.toFixed(2)}
+                                </span>
+                                <button
+                                  onClick={() => startEdit(bc)}
+                                  className="text-xs px-1.5 py-0.5 rounded text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+                                  title="Edit allocated amount"
+                                >
+                                  ✎
+                                </button>
+                              </>
+                            )}
+                          </div>
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
                           <div
@@ -191,7 +280,7 @@ export default function BudgetView({ budgets, goals, trends }: BudgetViewProps) 
 
         {/* Goals */}
         <div className="bg-surface rounded-lg shadow-md p-6 border border-gray-200">
-          <h2 className="text-xl font-semibold text-text-primary mb-4">🎯 Goals</h2>
+          <h2 className="text-xl font-semibold text-text-primary mb-4">Goals</h2>
           {goals.length === 0 ? (
             <p className="text-text-secondary">No goals set yet</p>
           ) : (
