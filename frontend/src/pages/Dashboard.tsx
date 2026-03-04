@@ -17,10 +17,10 @@ export default function Dashboard() {
     try {
       setLoading(true);
 
-      // Get last 30 days
-      const endDate = new Date();
-      const startDate = new Date();
-      startDate.setDate(startDate.getDate() - 30);
+      // Get current calendar month
+      const now = new Date();
+      const startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+      const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
 
       const [summaryData, breakdownData] = await Promise.all([
         analyticsApi.getSummary(startDate.toISOString(), endDate.toISOString()),

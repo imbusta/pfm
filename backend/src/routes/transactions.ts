@@ -14,7 +14,7 @@ router.get('/', async (req: Request, res: Response) => {
     const offset = (page - 1) * limit;
     const { search, category, startDate, endDate } = req.query as Record<string, string | undefined>;
 
-    const { rows, total } = await TransactionModel.findAll({ limit, offset, search, category, startDate, endDate });
+    const { rows, total } = await TransactionModel.findPaginated({ limit, offset, search, category, startDate, endDate });
     res.json({ success: true, data: rows, total, page, limit });
   } catch (error) {
     res.status(500).json({

@@ -54,7 +54,7 @@ router.post('/', async (req: Request, res: Response) => {
 router.get('/suggestions', async (req: Request, res: Response) => {
   try {
     const { months = '3' } = req.query;
-    const { rows: transactions } = await TransactionModel.findAll();
+    const transactions = await TransactionModel.findAll();
     const suggestions = plannerService.suggestBudget(transactions, parseInt(months as string));
 
     res.json({ success: true, data: suggestions });
@@ -124,7 +124,7 @@ router.get('/goals/:id/plan', async (req: Request, res: Response) => {
       return;
     }
 
-    const { rows: transactions } = await TransactionModel.findAll();
+    const transactions = await TransactionModel.findAll();
     const plan = plannerService.planGoal(goal, transactions);
 
     res.json({ success: true, data: plan });

@@ -47,9 +47,6 @@ export class AnalyticsService {
 
     transactions.forEach(t => {
       const month = `${t.date.getFullYear()}-${t.date.getMonth() + 1}`.padStart(2, '0'); // YYYY-MM
-      if ((month) === '2025-12') {
-        console.log(t);
-      }
       const existing = monthMap.get(month) || { income: 0, expenses: 0 };
 
       if (t.type === 'income') {

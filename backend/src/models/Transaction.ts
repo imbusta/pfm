@@ -20,7 +20,44 @@ export class TransactionModel {
     `;
   }
 
-  static async findAll(opts?: {
+  static async findAll(filters?: {
+    search?: string;
+    category?: string;
+    startDate?: string;
+    endDate?: string;
+  }): Promise<Transaction[]> {
+    const conditions: string[] = ['t.deleted_at IS NULL'];
+    const values: any[] = [];
+    let idx = 1;
+
+    if (filters?.search) {
+      conditions.push(`t.description ILIKE $${idx++}`);
+      values.push(`%${filters.search}%`);
+    }
+    if (filters?.category) {
+      conditions.push(`LOWER(c.name) = LOWER($${idx++})`);
+      values.push(filters.category);
+    }
+    if (filters?.startDate) {
+      conditions.push(`t.date >= $${idx++}`);
+      values.push(filters.startDate);
+    }
+    if (filters?.endDate) {
+      conditions.push(`t.date <= $${idx++}`);
+      values.push(filters.endDate);
+    }
+
+    const where = `WHERE ${conditions.join(' AND ')}`;
+    const dataQuery = `
+      ${this.getBaseQuery()}
+      ${where}
+      ORDER BY t.date DESC, t.created_at DESC
+    `;
+    const result = await db.query(dataQuery, values);
+    return result.rows;
+  }
+
+  static async findPaginated(opts?: {
     limit?: number;
     offset?: number;
     search?: string;

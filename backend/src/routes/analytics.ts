@@ -19,7 +19,7 @@ router.get('/summary', async (req: Request, res: Response) => {
       return;
     }
 
-    const { rows: transactions } = await TransactionModel.findAll();
+    const transactions = await TransactionModel.findAll();
     const summary = analyticsService.calculateSummary(
       transactions,
       new Date(startDate as string),
@@ -44,7 +44,7 @@ router.get('/breakdown', async (req: Request, res: Response) => {
   try {
     const { startDate, endDate } = req.query;
 
-    let { rows: transactions } = await TransactionModel.findAll();
+    let transactions = await TransactionModel.findAll();
 
     // Filter by date range if provided
     if (startDate && endDate) {
@@ -70,7 +70,7 @@ router.get('/breakdown', async (req: Request, res: Response) => {
 // GET /api/analytics/trends - Get monthly trends
 router.get('/trends', async (_req: Request, res: Response) => {
   try {
-    const { rows: transactions } = await TransactionModel.findAll();
+    const transactions = await TransactionModel.findAll();
     const trends = analyticsService.calculateMonthlyTrends(transactions);
 
     res.json({
@@ -88,7 +88,7 @@ router.get('/trends', async (_req: Request, res: Response) => {
 // GET /api/analytics/recurring - Detect recurring transactions
 router.get('/recurring', async (_req: Request, res: Response) => {
   try {
-    const { rows: transactions } = await TransactionModel.findAll();
+    const transactions = await TransactionModel.findAll();
     const patterns = recurrenceService.detectRecurring(transactions);
 
     res.json({
@@ -107,7 +107,7 @@ router.get('/recurring', async (_req: Request, res: Response) => {
 router.get('/anomalies', async (req: Request, res: Response) => {
   try {
     const { category } = req.query;
-    const { rows: transactions } = await TransactionModel.findAll();
+    const transactions = await TransactionModel.findAll();
     const anomalies = analyticsService.detectAnomalies(
       transactions,
       category as string | undefined

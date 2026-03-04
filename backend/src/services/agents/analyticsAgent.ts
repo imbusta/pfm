@@ -26,22 +26,39 @@ Guidelines:
 
 const calculate_summary_tool = tool({
     name: 'calculate_summary',
-    description: 'Calculate the income, expense, and net amount summary for the last 30 days.',
-    parameters: z.object({}),
-    async execute() {
-        const { rows: transactions } = await TransactionModel.findAll();
-        const endDate = new Date();
-        const startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    description: 'Calculate the income, expense, and net amount summary for a given period. ' +
+        'Pass start_date and end_date (YYYY-MM-DD) to target a specific range (e.g. a full calendar month). ' +
+        'If omitted, defaults to the last 30 days. ' +
+        'Always pass explicit dates when you want the result to be consistent with calculate_monthly_trends output.',
+    parameters: z.object({
+        start_date: z.string().nullable().describe('Start date in YYYY-MM-DD format, or null to use last 30 days'),
+        end_date: z.string().nullable().describe('End date in YYYY-MM-DD format, or null to use today'),
+    }),
+    async execute({ start_date, end_date }: { start_date: string | null; end_date: string | null }) {
+        const transactions = await TransactionModel.findAll();
+        const endDate = end_date ? new Date(end_date) : new Date();
+        const startDate = start_date ? new Date(start_date) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
         return analyticsService.calculateSummary(transactions, startDate, endDate);
     },
 });
 
 const calculate_category_breakdown_tool = tool({
     name: 'calculate_category_breakdown',
-    description: 'Calculate the expense breakdown by category across all transactions on record.',
-    parameters: z.object({}),
-    async execute() {
-        const { rows: transactions } = await TransactionModel.findAll();
+    description: 'Calculate the expense breakdown by category. ' +
+        'Pass start_date and end_date (YYYY-MM-DD) to target a specific range (e.g. a full calendar month). ' +
+        'If omitted (null), includes all transactions on record. ' +
+        'Always pass explicit dates when you want the result to be consistent with calculate_monthly_trends output.',
+    parameters: z.object({
+        start_date: z.string().nullable().describe('Start date in YYYY-MM-DD format, or null for all time'),
+        end_date: z.string().nullable().describe('End date in YYYY-MM-DD format, or null for all time'),
+    }),
+    async execute({ start_date, end_date }: { start_date: string | null; end_date: string | null }) {
+        let transactions = await TransactionModel.findAll();
+        if (start_date && end_date) {
+            const from = new Date(start_date);
+            const to = new Date(end_date);
+            transactions = transactions.filter(t => t.date >= from && t.date <= to);
+        }
         return analyticsService.calculateCategoryBreakdown(transactions);
     },
 });
@@ -51,7 +68,7 @@ const calculate_monthly_trends_tool = tool({
     description: 'Calculate month-by-month income and expense trends across all transactions on record.',
     parameters: z.object({}),
     async execute() {
-        const { rows: transactions } = await TransactionModel.findAll();
+        const transactions = await TransactionModel.findAll();
         return analyticsService.calculateMonthlyTrends(transactions);
     },
 });
@@ -61,7 +78,7 @@ const calculate_monthly_trends_tool = tool({
 //     description: 'Calculate the average transaction spending amount, optionally filtered by category.',
 //     parameters: z.object({ category: z.string().optional() }),
 //     async execute({ category }: { category?: string }) {
-//         const { rows: transactions } = await TransactionModel.findAll();
+//         const transactions = await TransactionModel.findAll();
 //         return analyticsService.calculateAverageSpending(transactions, category);
 //     },
 // });
@@ -71,7 +88,7 @@ const calculate_monthly_trends_tool = tool({
 //     description: 'Detect unusually high or low transactions compared to the historical average, optionally filtered by category.',
 //     parameters: z.object({ category: z.string().optional() }),
 //     async execute({ category }: { category?: string }) {
-//         const { rows: transactions } = await TransactionModel.findAll();
+//         const transactions = await TransactionModel.findAll();
 //         return analyticsService.detectAnomalies(transactions, category);
 //     },
 // });

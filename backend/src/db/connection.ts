@@ -1,5 +1,10 @@
-import { Pool, PoolClient, QueryResult } from 'pg';
+import { Pool, PoolClient, QueryResult, types } from 'pg';
 import config from '../config';
+
+// Parse PostgreSQL `date` columns (OID 1082) as Date objects (midnight UTC)
+// Without this, pg returns date columns as raw strings ("YYYY-MM-DD"),
+// breaking Date comparisons and .getFullYear() calls in analytics.
+types.setTypeParser(1082, (val: string) => new Date(val + 'T00:00:00Z'));
 
 class Database {
   private static instance: Database;
